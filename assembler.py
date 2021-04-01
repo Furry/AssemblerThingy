@@ -1,5 +1,10 @@
 com_count = 0
-assem_code = []
+
+# To store it during iteration
+assem_cache = []
+
+# To store the code paired with each line
+assem_code = {}
 
 des_file = input("what file do you want to load?\n")
 cur_file = open(des_file, "r")
@@ -14,8 +19,16 @@ for line in cur_file:
     elif values[0] == "//":
         com_count += 1
     else:
-        assem_code.append(values[0])
-map(lambda x: "//".split(x)[0], assem_code)
+        assem_cache.append(values[0])
+    #END
+#END
 
-for i in assem_code:
-    print(i)
+map(lambda x: "//".split(x)[0], assem_cache)
+
+index = 0
+for line in assem_cache:
+    index += 1
+    assem_code[index] = line
+#END
+
+print(assem_code)
