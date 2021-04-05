@@ -26,6 +26,7 @@ for line in cur_file:
     #END
 #END
 
+# Filters out inline commnets by splitting each line by // and only taking the first element.
 map(lambda x: "//".split(x)[0], assem_cache)
 
 # Assign each line it's own entry in an array, with the key as it's index in the array previously.
@@ -37,4 +38,20 @@ for line in assem_cache:
 
 # ! START OF ASSEMBLER
 
+for key in assem_code.keys():
+    elem = assem_code[key] # The current item in iteration
+
+    if elem.startswith("@"): # Handle A address
+        aVal = elem[1:]
+        print(key)
+        if aVal.isdigit():
+            aValBinary = "{0:b}".format(aVal)
+            assem_code[key] = "0" * (16 - len(aValBinary)) + aValBinary
+        else:
+            aValBinary = "{0:b}".format(key)
+            assem_code[key] = "0" * (16 - len(aValBinary)) + aValBinary
+        #END
+    #END
+
+    
 print(assem_code)
