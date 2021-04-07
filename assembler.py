@@ -7,8 +7,8 @@ assem_cache = []
 assem_code = {}
 
 
-# des_file = input("what file do you want to load?\n")
-des_file = "Mult.asm"
+des_file = input("what file do you want to load?\n")
+# des_file = "Mult.asm"
 
 cur_file = open(des_file, "r")
 
