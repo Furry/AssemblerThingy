@@ -87,9 +87,8 @@ for key in assem_code.keys():
 
     if elem.startswith("@"): # Handle A address
         aVal = elem[1:]
-        print(key)
         if aVal.isdigit():
-            aValBinary = "{0:b}".format(aVal)
+            aValBinary = "{0:b}".format(int(aVal))
             assem_code[key] = "0" * (16 - len(aValBinary)) + aValBinary
         else:
             aValBinary = "{0:b}".format(key)
