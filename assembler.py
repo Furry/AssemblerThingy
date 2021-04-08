@@ -54,4 +54,15 @@ for key in assem_code.keys():
     #END
 
     
-print(assem_code)
+
+# write to a file
+
+# print(assem_code)
+
+assem_list = []
+for key in assem_code:
+    assem_list.append(assem_code[key])
+
+assem_file = open("assem_code.txt", "w")
+assem_file.write("\n".join(assem_list))
+assem_file.close()
