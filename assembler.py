@@ -6,6 +6,29 @@ assem_cache = []
 # To store the code paired with each line
 assem_code = {}
 
+# AAAA dest and jump dictionaries
+
+dest = {
+    "null": [0, 0, 0],
+    "M": [0, 0, 1],
+    "D": [0,  1,  0],
+    "MD": [0, 1, 1],
+    "A": [1, 0 , 0],
+    "AM": [1, 0, 1],
+    "AD": [1, 1, 0],
+    "AMD": [1, 1, 1]
+}
+
+jump = {
+    "null": [0, 0, 0],
+    "JGT": [0, 0, 1],
+    "JEQ": [0, 1, 0],
+    "JGE": [0, 1, 1],
+    "JLT": [1, 0, 0],
+    "JNE": [1, 0, 1],
+    "JLE": [1, 1, 0],
+    "JMP": [1, 1, 1]
+}
 
 des_file = input("what file do you want to load?\n")
 # des_file = "Mult.asm"
