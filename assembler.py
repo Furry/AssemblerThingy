@@ -1,112 +1,120 @@
-com_count = 0
+import json
 
-# To store it during iteration
-assem_cache = []
+dict_file = open("dicts.json")
+dicts = json.load(dict_file)
 
-# To store the code paired with each line
-assem_code = {}
+assem_file = open("Pong.asm", "r")
 
-# AAAA dest and jump dictionaries
-dest = {
-    "null": [0, 0, 0],
-    "M": [0, 0, 1],
-    "D": [0,  1,  0],
-    "MD": [0, 1, 1],
-    "A": [1, 0 , 0],
-    "AM": [1, 0, 1],
-    "AD": [1, 1, 0],
-    "AMD": [1, 1, 1]
+
+# To track what memory addresses we can use
+memLocation = 16
+
+assem_code = [ ]
+binary_code = [ ]
+
+# A pre-defined list of addresses
+# This is also mutated as new variable names are written here.
+addresses = {
+    "SCREEN": 16384,
+    "KBD": 24576
 }
 
-jump = {
-    "null": [0, 0, 0],
-    "JGT": [0, 0, 1],
-    "JEQ": [0, 1, 0],
-    "JGE": [0, 1, 1],
-    "JLT": [1, 0, 0],
-    "JNE": [1, 0, 1],
-    "JLE": [1, 1, 0],
-    "JMP": [1, 1, 1]
-}
+def handleInstructionA(line):
+    # Parse out the actual name of a given command
+    if line.startswith("@"): line = line[1:]
 
-# comp dict
-comp = {
-    "0": [1, 0, 1, 0, 1, 0],
-    "1": [1, 1, 1, 1, 1, 1],
-    "-1": [1, 1, 1, 0, 1, 0],
-    "D": [0, 0, 1, 1, 0, 0],
-    "A": [1, 1, 0, 0, 0, 0],
-    "!D": [0, 0, 1, 1, 0, 1],
-    "!A": [1, 1, 0, 0, 0, 1],
-    "-D": [0, 0, 1, 1, 1, 1],
-    "-A": [1, 1, 0, 0, 1, 1],
-    "D+1": [0, 1, 1, 1, 1, 1],
-    "A+1": [1, 1, 0, 1, 1, 1],
-    "D-1": [0, 0, 1, 1, 1, 0],
-    "A-1": [1, 1, 0, 0, 1, 0],
-    "D+A": [0, 0, 0, 0, 1, 0],
-    "D-A": [0, 1, 0, 0, 1, 1],
-    "A-D": [0, 0, 0, 1, 1, 1],
-    "D&A": [0, 0, 0, 0, 0, 0],
-    "D|A": [0, 1, 0, 1, 0, 1]
-}
-
-des_file = input("what file do you want to load?\n")
-# des_file = "Mult.asm"
-
-cur_file = open(des_file, "r")
-
-# Iterate over all ines
-for line in cur_file:
-    # Split by new line
-    values = line.split()
-    if len(values) == 0:
-        com_count += 1
-    # RM comment
-    elif values[0] == "//":
-        com_count += 1
+    if line in addresses.keys():
+        # If the value already exists in the address table,
+        # Give it the stored value.
+        res = "{0:b}".format(addresses[line])
+    elif line.isdigit():
+        # If it's a number, set directly to it.
+        res = "{0:b}".format(int(line))
     else:
-        assem_cache.append(values[0])
+        # If it's a unique 'variable name',
+        # Give it a mem value of the closest possible location, and save it
+        # to 'addresses'
+
+        global memLocation
+        addresses[line] = memLocation
+        res = "{0:b}".format(memLocation)
+        memLocation += 1
+    #END
+
+    # Return the binary, and pad it up to 16 characters with 0s
+    return "0" * (16 - len(res)) + res
+#END
+
+def handleInstructionC(line):
+    # Split on all instances of =
+    eqsplit = line.split("=")
+    # Split on all instances of ;
+    cjsplit = line.split(";")
+
+    # Construct an array of dest, comp, and jump values
+    # Depending on if it split on = or split on ;
+    if len(eqsplit) == 2:
+        item = [eqsplit[0], eqsplit[1], "null"]
+    else:
+        item = ["null", cjsplit[0], cjsplit[1]]
+    #END
+
+    destpre, comppre, jumppre = item
+
+    dest = dicts["dest"][destpre]
+    comp = dicts["comp"][comppre]
+    jump = dicts["jump"][jumppre]
+
+    # Concatinate the value from each dict into one string, prefixed with the signature '111' for C instructions
+    res = "111" + "".join([str(int) for int in comp]) + "".join([str(int) for int in dest]) + "".join([str(int) for int in jump])
+
+    return res
+#END
+
+# Write each valid line to the 'assem_code' array
+for line in assem_file:
+    # Strip all whitespace
+    stripped = line.strip()
+
+    # Parse out comments
+    if not stripped.startswith("//") and stripped:
+        assem_code.append(line.strip())
     #END
 #END
 
-# Filters out inline commnets by splitting each line by // and only taking the first element.
-map(lambda x: "//".split(x)[0], assem_cache)
+# This line is bc of u, ferris.
+map(lambda x: "//".split(x)[0], assem_code)
 
-# Assign each line it's own entry in an array, with the key as it's index in the array previously.
-index = 0
-for line in assem_cache:
-    index += 1
-    assem_code[index] = line
+
+# Create a cache of the modified assembly code with tags removed
+tmp_cache = []
+lineCounter = 0
+for (index, line) in enumerate(assem_code):
+    # If a tag is seen, remove it, and assign it a new memory address for the current line
+    if line.startswith("("):
+        name = line[1:-1]
+        addresses[name] = lineCounter
+    else:
+        # If there's no tag, increment the lines by one
+        lineCounter += 1
+        tmp_cache.append(line)
+    #END
+#END
+# Apply the filtered code to our main assembly code
+assem_code = tmp_cache
+
+
+for (index, line) in enumerate(assem_code):
+    if line.startswith("@"):
+        binary_code.append(handleInstructionA(line))
+    else:
+        binary_code.append(handleInstructionC(line))
+    #END
 #END
 
-# ! START OF ASSEMBLER
+newFile = open("res.hack", "w")
 
-for key in assem_code.keys():
-    elem = assem_code[key] # The current item in iteration
-
-    if elem.startswith("@"): # Handle A address
-        aVal = elem[1:]
-        if aVal.isdigit():
-            aValBinary = "{0:b}".format(int(aVal))
-            assem_code[key] = "0" * (16 - len(aValBinary)) + aValBinary
-        else:
-            aValBinary = "{0:b}".format(key)
-            assem_code[key] = "0" * (16 - len(aValBinary)) + aValBinary
-        #END
-    #END
-
-    
-
-# Write to a file
-# print(assem_code)
-
-assem_list = []
-for key in assem_code:
-    assem_list.append(assem_code[key])
-    # move to a list ! exciting
-
-assem_file = open("assem_code.txt", "w")
-# open / create file, then write to that file
-assem_file.write("\n".join(assem_list))
-assem_file.close()
+# Write each line of binary code
+for line in binary_code:
+    newFile.write(line + "\n")
+newFile.close() # Close the file like a good boy uwu
