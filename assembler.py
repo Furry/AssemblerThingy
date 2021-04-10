@@ -3,8 +3,9 @@ import json
 dict_file = open("dicts.json")
 dicts = json.load(dict_file)
 
-assem_file = open("Pong.asm", "r")
+des_file = input("What file do you want to load?\n>")
 
+assem_file = open(des_file, "r")
 
 # To track what memory addresses we can use
 memLocation = 16
@@ -21,7 +22,7 @@ addresses = {
 
 def handleInstructionA(line):
     # Parse out the actual name of a given command
-    if line.startswith("@"): line = line[1:]
+    line = line[1:]
 
     if line in addresses.keys():
         # If the value already exists in the address table,
@@ -64,12 +65,86 @@ def handleInstructionC(line):
     dest = dicts["dest"][destpre]
     comp = dicts["comp"][comppre]
     jump = dicts["jump"][jumppre]
-
+    
     # Concatinate the value from each dict into one string, prefixed with the signature '111' for C instructions
     res = "111" + "".join([str(int) for int in comp]) + "".join([str(int) for int in dest]) + "".join([str(int) for int in jump])
 
     return res
 #END
+
+# Debugger to stop the assembler if there is a syntax error
+# and return what line the error was on.
+# Guys this debugger is pretty poggers amirite
+
+def debugger(lineInput, instType, index):
+    error = False # Sets the default error state to false.
+    errorType = "none" # Defaults the error type to none.
+    # If the instruction is an a instruction
+    if instType == "a": 
+        atCount = 0
+        for i in lineInput:
+            if i == "@":
+                atCount = atCount + 1
+            if atCount > 1:
+                error = True
+                errorType = "atCountExceeds1"
+    # If the instruction is a c instruction
+    else: 
+        # Sets the counter for how many = and ; there are to 0.
+        chCount = 0
+        # Check to see if multiple equals or semicolons exist.
+        for i in lineInput:
+            if i == "=":
+                chCount = chCount + 1
+            elif i == ";":
+                chCount = chCount + 1
+        if chCount > 1: # If there is more than one = or ;, set an error.
+            error = True
+            errorType = "separatorLimitReached"
+            
+        eqsplit = lineInput.split("=")
+        cjsplit = lineInput.split(";")
+        
+        # Checks if equation or comp jump instruction.
+        if len(eqsplit) == 2: 
+            # Checks if the first part of the equation is a valid instruction.
+            if not(eqsplit[0] in dicts["comp"].keys()) and not(eqsplit[0] in dicts["dest"].keys()):
+                error = True
+                errorType = "invalidInstruction"
+                print("a")
+            # Checks if the fsecond part of the equation is a valid instruction.    
+            if not(eqsplit[1] in dicts["comp"].keys()) and not(eqsplit[1] in dicts["dest"].keys()):
+                error = True
+                errorType = "invalidInstruction"
+                print("b")        
+        elif len(cjsplit) == 2:
+            # Checks if the first part of the jump instruction is valid.
+            if not(cjsplit[0] in dicts["jumpprefix"]):
+                error = True
+                errorType = "invalidJumpPrefix"
+            # Checks if the second part of the jump instruction is valid.
+            if not(cjsplit[1] in dicts["jump"].keys()):
+                error = True
+                errorType = "invalidJumpInstruction"
+                
+        else: # If the C instruction is incomplete.
+            # Checks if the incomplete instruction is part of a valid instruction and sets the error accordingly.
+            if chCount == 0 and not(eqsplit[0] in dicts["comp"].keys()) and not(eqsplit[0] in dicts["dest"].keys()):
+                error = True
+                errorType = "invalidInstruction"
+            elif chCount == 0:
+                error = True
+                errorType = "incompleteInstruction"
+                
+    if error == False:
+        return True
+    else:
+        print("OOPSIE WOOPSIE!!")
+        print("----------------")
+        print("It looks like you made a fucky wucky...")
+        print("Error " + errorType + " @ Line: " +str(index+1))
+        print(">>> "+lineInput)
+        return False
 
 # Write each valid line to the 'assem_code' array
 for line in assem_file:
@@ -83,7 +158,7 @@ for line in assem_file:
 #END
 
 # This line is bc of u, ferris.
-map(lambda x: "//".split(x)[0], assem_code)
+map(lambda x: "//".split(x)[0], assem_code) # hehe shush 
 
 
 # Create a cache of the modified assembly code with tags removed
@@ -106,15 +181,25 @@ assem_code = tmp_cache
 
 for (index, line) in enumerate(assem_code):
     if line.startswith("@"):
-        binary_code.append(handleInstructionA(line))
+        # Runs the debugger function. If there are no errors, proceed.
+        if debugger(line, "a", index):
+            binary_code.append(handleInstructionA(line))
+        else:
+            break
     else:
-        binary_code.append(handleInstructionC(line))
+        if debugger(line, "c", index):
+            binary_code.append(handleInstructionC(line))
+        else:
+            break
     #END
 #END
 
-newFile = open("res.hack", "w")
+newFile = open("Output.hack", "w")
 
 # Write each line of binary code
 for line in binary_code:
     newFile.write(line + "\n")
+    
+print("Done! Wrote "+str(index)+" lines into Output.hack")
+
 newFile.close() # Close the file like a good boy uwu
