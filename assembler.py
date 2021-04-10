@@ -7,6 +7,7 @@ des_file = input("What file do you want to load?\n>")
 
 assem_file = open(des_file, "r")
 
+errorStatus = False
 # To track what memory addresses we can use
 memLocation = 16
 
@@ -112,7 +113,7 @@ def debugger(lineInput, instType, index):
                 error = True
                 errorType = "invalidInstruction"
                 print("a")
-            # Checks if the fsecond part of the equation is a valid instruction.    
+            # Checks if the second part of the equation is a valid instruction.    
             if not(eqsplit[1] in dicts["comp"].keys()) and not(eqsplit[1] in dicts["dest"].keys()):
                 error = True
                 errorType = "invalidInstruction"
@@ -185,11 +186,13 @@ for (index, line) in enumerate(assem_code):
         if debugger(line, "a", index):
             binary_code.append(handleInstructionA(line))
         else:
+            errorStatus = True
             break
     else:
         if debugger(line, "c", index):
             binary_code.append(handleInstructionC(line))
         else:
+            errorStatus = True
             break
     #END
 #END
@@ -200,6 +203,7 @@ newFile = open("Output.hack", "w")
 for line in binary_code:
     newFile.write(line + "\n")
     
-print("Done! Wrote "+str(index)+" lines into Output.hack")
+if errorStatus = False:
+    print("Done! Wrote "+str(index+1)+" lines into Output.hack")
 
 newFile.close() # Close the file like a good boy uwu
