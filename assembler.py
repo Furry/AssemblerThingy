@@ -4,6 +4,9 @@ dict_file = open("dicts.json")
 dicts = json.load(dict_file)
 
 des_file = input("What file do you want to load?\n>")
+blank_list = des_file.split(".")
+# gets name of the file
+name_file = blank_list[0]
 
 assem_file = open(des_file, "r")
 
@@ -197,13 +200,14 @@ for (index, line) in enumerate(assem_code):
     #END
 #END
 
-newFile = open("Output.hack", "w")
+filename = name_file + ".hack"
+newFile = open(filename, "w")
 
 # Write each line of binary code
 for line in binary_code:
     newFile.write(line + "\n")
     
-if errorStatus = False:
+if errorStatus is False:
     print("Done! Wrote "+str(index+1)+" lines into Output.hack")
 
 newFile.close() # Close the file like a good boy uwu
