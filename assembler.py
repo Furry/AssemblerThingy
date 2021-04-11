@@ -208,6 +208,6 @@ for line in binary_code:
     newFile.write(line + "\n")
     
 if errorStatus is False:
-    print("Done! Wrote "+str(index+1)+" lines into Output.hack")
+    print("Done! Wrote "+str(index+1)+" lines into " + filename)
 
 newFile.close() # Close the file like a good boy uwu
