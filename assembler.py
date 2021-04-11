@@ -115,12 +115,10 @@ def debugger(lineInput, instType, index):
             if not(eqsplit[0] in dicts["comp"].keys()) and not(eqsplit[0] in dicts["dest"].keys()):
                 error = True
                 errorType = "invalidInstruction"
-                print("a")
             # Checks if the second part of the equation is a valid instruction.    
             if not(eqsplit[1] in dicts["comp"].keys()) and not(eqsplit[1] in dicts["dest"].keys()):
                 error = True
-                errorType = "invalidInstruction"
-                print("b")        
+                errorType = "invalidInstruction"     
         elif len(cjsplit) == 2:
             # Checks if the first part of the jump instruction is valid.
             if not(cjsplit[0] in dicts["jumpprefix"]):
@@ -145,7 +143,7 @@ def debugger(lineInput, instType, index):
     else:
         print("OOPSIE WOOPSIE!!")
         print("----------------")
-        print("It looks like you made a fucky wucky...")
+        print("It looks like you made a freaky deaky...")
         print("Error " + errorType + " @ Line: " +str(index+1))
         print(">>> "+lineInput)
         return False
