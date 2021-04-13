@@ -145,9 +145,9 @@ def debugger(lineInput, instType, index):
         print("----------------")
         print("It looks like you made a freaky deaky...")
         print("Error " + errorType + " @ Line: " +str(index+1))
-        if (index-1 >= 0): print(">>  " + assem_code[index-1])
-        print(">>> " + lineInput + " <<<")
-        if (len(assem_code) >= index + 1): print(">>  " + assem_code[index+1])
+        if (index-1 >= 0): print(" |  " + assem_code[index-1])
+        print(">>> " + lineInput)
+        if (len(assem_code) >= index + 1): print(" |  " + assem_code[index+1])
         return False
 
 # Write each valid line to the 'assem_code' array

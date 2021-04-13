@@ -13,7 +13,7 @@ M=D
 A=M
 M=-1
 @address
-D=M
+D=Mw
 @32
 D=D+A
 @address
