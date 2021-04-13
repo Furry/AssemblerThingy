@@ -3,7 +3,7 @@ import json
 dict_file = open("dicts.json")
 dicts = json.load(dict_file)
 
-des_file = input("What file do you want to load?\n>")
+des_file = input("What file do you want to load?\n> ")
 blank_list = des_file.split(".")
 # gets name of the file
 name_file = blank_list[0]
@@ -145,7 +145,9 @@ def debugger(lineInput, instType, index):
         print("----------------")
         print("It looks like you made a freaky deaky...")
         print("Error " + errorType + " @ Line: " +str(index+1))
-        print(">>> "+lineInput)
+        if (index-1 >= 0): print(">>  " + assem_code[index-1])
+        print(">>> " + lineInput + " <<<")
+        if (len(assem_code) >= index + 1): print(">>  " + assem_code[index+1])
         return False
 
 # Write each valid line to the 'assem_code' array

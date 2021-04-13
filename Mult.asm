@@ -1,7 +1,7 @@
 @0
 D=M
 @INFINITE_LOOP
-D;JLE 
+D;JLE
 @counter
 M=D
 @SCREEN
